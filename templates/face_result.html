@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Emotion Analysis Result - Stress Predictor</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+<button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle dark mode">
+    <span id="themeIcon">🌙</span>
+</button>
+
+<div class="container">
+    <div class="progress-steps">
+        <div class="step completed">1</div>
+        <div class="step-connector"></div>
+        <div class="step completed">2</div>
+        <div class="step-connector"></div>
+        <div class="step active">3</div>
+    </div>
+
+    <h2>😊 Emotion Analysis Result</h2>
+    <p>Here's what we detected from your image, {{ username }}</p>
+
+    <!-- Emotion Display -->
+    <div class="result-card">
+        <div class="emotion-emoji">
+            {% if result.emotion == 'happy' %}😊
+            {% elif result.emotion == 'sad' %}😢
+            {% elif result.emotion == 'angry' %}😠
+            {% elif result.emotion == 'fear' %}😨
+            {% elif result.emotion == 'surprise' %}😲
+            {% elif result.emotion == 'disgust' %}🤢
+            {% else %}😐{% endif %}
+        </div>
+        
+        <h3 style="margin-bottom: 10px;">Detected: <strong>{{ result.emotion|title }}</strong></h3>
+        <p style="margin-bottom: 20px;">Confidence: {{ result.confidence }}%</p>
+        
+        <!-- Stress Level Badge -->
+        <div class="badge {% if result.stress_level == 1 %}badge-low{% elif result.stress_level == 2 %}badge-moderate{% else %}badge-high{% endif %}">
+            {{ result.stress_text }}
+        </div>
+    </div>
+
+    <!-- Emotion Probabilities -->
+    <div class="card" style="margin-top: 20px;">
+        <h3 style="margin-bottom: 15px;">📊 Emotion Breakdown</h3>
+        {% for emotion, prob in result.probabilities.items() %}
+        <div class="emotion-bar">
+            <div class="emotion-label">
+                {% if emotion == 'happy' %}😊
+                {% elif emotion == 'sad' %}😢
+                {% elif emotion == 'angry' %}😠
+                {% elif emotion == 'fear' %}😨
+                {% elif emotion == 'surprise' %}😲
+                {% elif emotion == 'disgust' %}🤢
+                {% else %}😐{% endif %}
+                {{ emotion|title }}
+            </div>
+            <div class="bar-container">
+                <div class="bar-fill {% if emotion == result.emotion %}primary{% endif %}" 
+                     style="width: {{ prob }}%"></div>
+            </div>
+            <div class="bar-value">{{ "%.1f"|format(prob) }}%</div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Stress Indicator -->
+    <div class="card" style="margin-top: 20px;">
+        <h3 style="margin-bottom: 15px;">🎯 Stress Indicator</h3>
+        <div class="meter-container">
+            <div class="meter-fill {% if result.stress_level == 1 %}low{% elif result.stress_level == 2 %}medium{% else %}high{% endif %}"
+                 style="width: {{ result.stress_score * 10 }}%"></div>
+        </div>
+        <div class="meter-labels">
+            <span>Low</span>
+            <span>Moderate</span>
+            <span>High</span>
+        </div>
+        <p style="margin-top: 15px; text-align: center;">
+            Stress Score: <strong>{{ result.stress_score }}/10</strong>
+        </p>
+    </div>
+
+    <!-- Advice Section -->
+    <div class="card advice-card" style="margin-top: 20px;">
+        <h3>💡 Personalized Suggestions</h3>
+        <ul class="advice-list">
+            {% for tip in advice %}
+            <li>{{ tip }}</li>
+            {% endfor %}
+        </ul>
+    </div>
+
+    <!-- Emergency Resources for High Stress -->
+    {% if result.stress_level == 3 %}
+    <div class="emergency-card">
+        <h3>🆘 Need Immediate Support?</h3>
+        <p>If you're feeling overwhelmed, please reach out:</p>
+        <ul>
+            <li>📞 National Crisis Helpline: <strong>988</strong></li>
+            <li>📱 Crisis Text Line: Text <strong>HOME</strong> to <strong>741741</strong></li>
+            <li>🌐 <a href="https://www.nimh.nih.gov/health/find-help" target="_blank">NIMH Find Help</a></li>
+        </ul>
+    </div>
+    {% endif %}
+
+    <div class="btn-group" style="margin-top: 30px;">
+        <a href="/face-upload" class="btn btn-secondary">← Try Again</a>
+        <a href="/dashboard" class="btn">Dashboard</a>
+        <a href="/measure" class="btn">Full Assessment →</a>
+    </div>
+
+    <div class="disclaimer">
+        ⚠️ This analysis is for informational purposes only and should not replace professional mental health assessment.
+    </div>
+
+    <!-- Model Information -->
+    <div class="model-info-box" style="margin-top: 20px;">
+        <h4>🤖 AI Model: EmotionDetector CNN (Keras/TensorFlow)</h4>
+        <div class="model-details">
+            <p><strong>Model File:</strong> emotiondetector.h5 (48.5 MB)</p>
+            <p><strong>Architecture:</strong> 18-layer Convolutional Neural Network</p>
+            <p><strong>Framework:</strong> TensorFlow/Keras</p>
+            <p><strong>Input:</strong> 48×48 grayscale face image</p>
+            <p><strong>Training Data:</strong> FER2013 Dataset</p>
+            <p><strong>Output Classes:</strong> 7 emotions (Angry, Disgust, Fear, Happy, Sad, Surprise, Neutral)</p>
+            <p><strong>Emotion → Stress Mapping:</strong></p>
+            <ul style="margin: 5px 0 0 20px; font-size: 12px;">
+                <li>😊 Happy → Low (1), 😲 Surprise → Low (3)</li>
+                <li>😐 Neutral → Moderate (4), 🤢 Disgust → Moderate (6)</li>
+                <li>😢 Sad → High (7), 😠 Angry → High (8), 😨 Fear → High (9)</li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<script>
+function toggleTheme() {
+    const body = document.body;
+    const icon = document.getElementById('themeIcon');
+    if (body.getAttribute('data-theme') === 'dark') {
+        body.removeAttribute('data-theme');
+        icon.textContent = '🌙';
+        localStorage.setItem('theme', 'light');
+    } else {
+        body.setAttribute('data-theme', 'dark');
+        icon.textContent = '☀️';
+        localStorage.setItem('theme', 'dark');
+    }
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme === 'dark') {
+        document.body.setAttribute('data-theme', 'dark');
+        document.getElementById('themeIcon').textContent = '☀️';
+    }
+});
+</script>
+
+</body>
+</html>

@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Text Analysis Result - Stress Predictor</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+<button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle dark mode">
+    <span id="themeIcon">🌙</span>
+</button>
+
+<div class="container">
+    <div class="progress-steps">
+        <div class="step completed">1</div>
+        <div class="step-connector"></div>
+        <div class="step completed">2</div>
+        <div class="step-connector"></div>
+        <div class="step active">3</div>
+    </div>
+
+    <h2>📊 Text Analysis Result</h2>
+    <p>Here's what we found from your text, {{ username }}</p>
+
+    <!-- Stress Level Badge -->
+    <div class="result-card">
+        <div class="badge {% if result.stress_level == 1 %}badge-low{% elif result.stress_level == 2 %}badge-moderate{% else %}badge-high{% endif %}"
+             style="font-size: 24px; padding: 15px 30px;">
+            {{ result.stress_text }}
+        </div>
+        
+        <div class="meter-container" style="margin-top: 20px;">
+            <div class="meter-fill {% if result.stress_level == 1 %}low{% elif result.stress_level == 2 %}medium{% else %}high{% endif %}"
+                 style="width: {{ result.stress_score * 10 }}%"></div>
+        </div>
+        <p style="margin-top: 10px;">Stress Score: <strong>{{ result.stress_score }}/10</strong></p>
+    </div>
+
+    <!-- Original Text -->
+    <div class="card" style="margin-top: 20px;">
+        <h3 style="margin-bottom: 15px;">📝 Your Text</h3>
+        <div class="text-preview">
+            "{{ text_input[:300] }}{% if text_input|length > 300 %}...{% endif %}"
+        </div>
+        <p style="margin-top: 10px; font-size: 14px; color: var(--text-secondary);">
+            {{ result.word_count }} words analyzed
+        </p>
+    </div>
+
+    <!-- Sentiment Analysis -->
+    <div class="card" style="margin-top: 20px;">
+        <h3 style="margin-bottom: 15px;">🎭 Sentiment Analysis</h3>
+        
+        <div class="sentiment-bars">
+            <div class="sentiment-item">
+                <span class="sentiment-label">Polarity</span>
+                <div class="sentiment-bar-container">
+                    <div class="sentiment-bar polarity" 
+                         style="width: {{ ((result.sentiment.polarity + 1) / 2 * 100)|int }}%; 
+                                {% if result.sentiment.polarity < 0 %}background: var(--accent-red);
+                                {% elif result.sentiment.polarity > 0.3 %}background: var(--accent-green);
+                                {% else %}background: var(--accent-yellow);{% endif %}">
+                    </div>
+                </div>
+                <span class="sentiment-value">
+                    {% if result.sentiment.polarity < -0.3 %}Negative
+                    {% elif result.sentiment.polarity > 0.3 %}Positive
+                    {% else %}Neutral{% endif %}
+                    ({{ "%.2f"|format(result.sentiment.polarity) }})
+                </span>
+            </div>
+            
+            <div class="sentiment-item">
+                <span class="sentiment-label">Subjectivity</span>
+                <div class="sentiment-bar-container">
+                    <div class="sentiment-bar subjectivity" 
+                         style="width: {{ (result.sentiment.subjectivity * 100)|int }}%;">
+                    </div>
+                </div>
+                <span class="sentiment-value">
+                    {% if result.sentiment.subjectivity > 0.6 %}Very Personal
+                    {% elif result.sentiment.subjectivity > 0.3 %}Somewhat Personal
+                    {% else %}Objective{% endif %}
+                    ({{ "%.2f"|format(result.sentiment.subjectivity) }})
+                </span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Keywords Found -->
+    {% if result.keywords_found %}
+    <div class="card" style="margin-top: 20px;">
+        <h3 style="margin-bottom: 15px;">🔑 Key Indicators Detected</h3>
+        
+        {% if result.keywords_found.high_stress %}
+        <div class="keyword-group">
+            <span class="keyword-label high">⚠️ Stress Indicators:</span>
+            <div class="keyword-chips">
+                {% for word in result.keywords_found.high_stress %}
+                <span class="chip chip-high">{{ word }}</span>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+        
+        {% if result.keywords_found.moderate_stress %}
+        <div class="keyword-group">
+            <span class="keyword-label moderate">⚡ Moderate Indicators:</span>
+            <div class="keyword-chips">
+                {% for word in result.keywords_found.moderate_stress %}
+                <span class="chip chip-moderate">{{ word }}</span>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+        
+        {% if result.keywords_found.low_stress %}
+        <div class="keyword-group">
+            <span class="keyword-label low">✅ Positive Indicators:</span>
+            <div class="keyword-chips">
+                {% for word in result.keywords_found.low_stress %}
+                <span class="chip chip-low">{{ word }}</span>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+    {% endif %}
+
+    <!-- Insights -->
+    <div class="card advice-card" style="margin-top: 20px;">
+        <h3>💡 Insights & Suggestions</h3>
+        <ul class="advice-list">
+            {% for insight in result.insights %}
+            <li>{{ insight }}</li>
+            {% endfor %}
+        </ul>
+    </div>
+
+    <!-- Emergency Resources for High Stress -->
+    {% if result.stress_level == 3 %}
+    <div class="emergency-card">
+        <h3>🆘 Need Immediate Support?</h3>
+        <p>Your text indicates high stress. Please consider reaching out:</p>
+        <ul>
+            <li>📞 National Crisis Helpline: <strong>988</strong></li>
+            <li>📱 Crisis Text Line: Text <strong>HOME</strong> to <strong>741741</strong></li>
+            <li>🌐 <a href="https://www.nimh.nih.gov/health/find-help" target="_blank">NIMH Find Help</a></li>
+        </ul>
+    </div>
+    {% endif %}
+
+    <div class="btn-group" style="margin-top: 30px;">
+        <a href="/text-analysis" class="btn btn-secondary">← Analyze Again</a>
+        <a href="/dashboard" class="btn">Dashboard</a>
+        <a href="/measure" class="btn">Full Assessment →</a>
+    </div>
+
+    <div class="disclaimer">
+        ⚠️ This analysis is for informational purposes only and should not replace professional mental health assessment.
+    </div>
+
+    <!-- Model Information -->
+    <div class="model-info-box" style="margin-top: 20px;">
+        <h4>🤖 AI Model Used: TextBlob NLP</h4>
+        <div class="model-details">
+            <p><strong>Technology:</strong> Natural Language Processing (NLP)</p>
+            <p><strong>Library:</strong> TextBlob with Pattern Analyzer</p>
+            <p><strong>Analysis Dimensions:</strong></p>
+            <ul style="margin: 5px 0 0 20px; font-size: 12px;">
+                <li><strong>Polarity:</strong> -1.0 (very negative) to +1.0 (very positive)</li>
+                <li><strong>Subjectivity:</strong> 0.0 (objective) to 1.0 (subjective)</li>
+            </ul>
+            <p style="margin-top: 8px;"><strong>Stress Mapping:</strong></p>
+            <ul style="margin: 5px 0 0 20px; font-size: 12px;">
+                <li>Negative sentiment → Higher stress indication</li>
+                <li>Neutral sentiment → Moderate stress indication</li>
+                <li>Positive sentiment → Lower stress indication</li>
+            </ul>
+            <p style="margin-top: 8px;"><strong>Keyword Analysis:</strong> Detects stress-related words and phrases</p>
+        </div>
+    </div>
+</div>
+
+<script>
+function toggleTheme() {
+    const body = document.body;
+    const icon = document.getElementById('themeIcon');
+    if (body.getAttribute('data-theme') === 'dark') {
+        body.removeAttribute('data-theme');
+        icon.textContent = '🌙';
+        localStorage.setItem('theme', 'light');
+    } else {
+        body.setAttribute('data-theme', 'dark');
+        icon.textContent = '☀️';
+        localStorage.setItem('theme', 'dark');
+    }
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme === 'dark') {
+        document.body.setAttribute('data-theme', 'dark');
+        document.getElementById('themeIcon').textContent = '☀️';
+    }
+});
+</script>
+
+</body>
+</html>

@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Live Face Detection - Stress Predictor</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+<button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle dark mode">
+    <span id="themeIcon">🌙</span>
+</button>
+
+<div class="container">
+    <h2>📹 Live Emotion Detection</h2>
+    <p>Real-time emotion analysis using your camera, {{ username }}</p>
+
+    <!-- Model Info Banner -->
+    <div class="model-banner" style="background: linear-gradient(135deg, var(--bg-gradient-1), var(--bg-gradient-2)); color: white; padding: 15px 20px; border-radius: 12px; margin-bottom: 20px;">
+        <div style="display: flex; align-items: center; gap: 15px; flex-wrap: wrap; justify-content: center;">
+            <span style="font-size: 1.5rem;">⚡</span>
+            <div style="text-align: center;">
+                <h4 style="margin: 0; color: white;">Real-time CNN Emotion Detection</h4>
+                <p style="margin: 5px 0 0 0; font-size: 13px; opacity: 0.9;">Analyzing emotions every 2 seconds • 7 emotion categories</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="camera-container">
+        <video id="video" autoplay playsinline></video>
+        <canvas id="canvas" style="display: none;"></canvas>
+        
+        <div id="cameraOverlay" class="camera-overlay">
+            <div class="camera-placeholder">
+                <div class="icon">📷</div>
+                <p>Camera access required</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Live Results (hidden until camera starts and first analysis) -->
+    <div id="liveResults" class="live-results" style="display: none;">
+        <div class="live-emotion">
+            <span id="emotionEmoji">😐</span>
+            <div>
+                <h4 id="emotionLabel">Analyzing...</h4>
+                <p id="confidenceLabel">Waiting for analysis</p>
+            </div>
+        </div>
+        <div id="stressBadge" class="badge badge-moderate">
+            --
+        </div>
+    </div>
+
+    <div class="btn-group" style="margin-top: 20px;">
+        <button id="startBtn" class="btn" onclick="startCamera()">
+            🎥 Start Camera
+        </button>
+        <button id="stopBtn" class="btn btn-secondary" onclick="stopCamera()" style="display: none;">
+            ⏹️ Stop Camera
+        </button>
+        <button id="captureBtn" class="btn" onclick="captureAndAnalyze()" style="display: none;">
+            📸 Analyze Now
+        </button>
+        <button id="saveBtn" class="btn btn-secondary" onclick="saveResult()" style="display: none;">
+            💾 Save Result
+        </button>
+    </div>
+
+    <div id="autoAnalyze" style="margin-top: 15px; display: none;">
+        <label class="toggle-label">
+            <input type="checkbox" id="autoCheckbox" onchange="toggleAutoAnalyze()">
+            <span class="toggle-slider"></span>
+            Auto-analyze every 2 seconds
+        </label>
+    </div>
+
+    <!-- Saved Result Panel -->
+    <div id="savedResult" class="card" style="margin-top: 20px; display: none;">
+        <h3>✅ Result Saved!</h3>
+        <p>Your emotion analysis has been saved to your history.</p>
+        <a href="/history?type=face" class="btn btn-sm">View History</a>
+    </div>
+
+    <div class="btn-group" style="margin-top: 30px;">
+        <a href="/face-upload" class="btn btn-secondary">← Upload Image Instead</a>
+        <a href="/dashboard" class="btn btn-secondary">Dashboard</a>
+    </div>
+
+    <div class="disclaimer">
+        💡 <strong>Tips:</strong> Ensure good lighting and face the camera directly for best results. 
+        Your camera feed is processed locally and not stored.
+    </div>
+</div>
+
+<script>
+let video = document.getElementById('video');
+let canvas = document.getElementById('canvas');
+let ctx = canvas.getContext('2d');
+let stream = null;
+let autoInterval = null;
+let lastResult = null;  // Store last analysis result for saving
+
+const emotionEmojis = {
+    'Happy': '😊',
+    'Sad': '😢',
+    'Angry': '😠',
+    'Fear': '😨',
+    'Surprise': '😲',
+    'Disgust': '🤢',
+    'Neutral': '😐',
+    // Also support lowercase
+    'happy': '😊',
+    'sad': '😢',
+    'angry': '😠',
+    'fear': '😨',
+    'surprise': '😲',
+    'disgust': '🤢',
+    'neutral': '😐'
+};
+
+async function startCamera() {
+    try {
+        stream = await navigator.mediaDevices.getUserMedia({ 
+            video: { facingMode: 'user', width: 640, height: 480 } 
+        });
+        video.srcObject = stream;
+        
+        document.getElementById('cameraOverlay').style.display = 'none';
+        document.getElementById('startBtn').style.display = 'none';
+        document.getElementById('stopBtn').style.display = 'inline-block';
+        document.getElementById('captureBtn').style.display = 'inline-block';
+        document.getElementById('autoAnalyze').style.display = 'block';
+        document.getElementById('liveResults').style.display = 'flex';
+        
+        // Run first analysis after a short delay to let camera initialize
+        setTimeout(captureAndAnalyze, 500);
+        
+    } catch (err) {
+        console.error('Camera error:', err);
+        alert('Could not access camera. Please ensure you have granted camera permissions.');
+    }
+}
+
+function stopCamera() {
+    if (stream) {
+        stream.getTracks().forEach(track => track.stop());
+        stream = null;
+    }
+    
+    if (autoInterval) {
+        clearInterval(autoInterval);
+        autoInterval = null;
+    }
+    
+    video.srcObject = null;
+    document.getElementById('cameraOverlay').style.display = 'flex';
+    document.getElementById('startBtn').style.display = 'inline-block';
+    document.getElementById('stopBtn').style.display = 'none';
+    document.getElementById('captureBtn').style.display = 'none';
+    document.getElementById('saveBtn').style.display = 'none';
+    document.getElementById('autoAnalyze').style.display = 'none';
+    document.getElementById('autoCheckbox').checked = false;
+    document.getElementById('liveResults').style.display = 'none';
+}
+
+async function captureAndAnalyze() {
+    if (!stream) return;
+    
+    // Capture frame
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    ctx.drawImage(video, 0, 0);
+    
+    const imageData = canvas.toDataURL('image/jpeg', 0.8);
+    
+    try {
+        const response = await fetch('/api/analyze-frame', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ image: imageData })
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            lastResult = result;  // Store for saving
+            updateDisplay(result);
+        } else {
+            console.log('Analysis failed:', result.error);
+            document.getElementById('emotionLabel').textContent = 'No face detected';
+            document.getElementById('confidenceLabel').textContent = result.error || 'Try adjusting position';
+        }
+    } catch (err) {
+        console.error('Analysis error:', err);
+    }
+}
+
+function updateDisplay(result) {
+    const emotion = result.emotion || 'Neutral';
+    document.getElementById('emotionEmoji').textContent = result.emoji || emotionEmojis[emotion] || '😐';
+    document.getElementById('emotionLabel').textContent = emotion;
+    document.getElementById('confidenceLabel').textContent = `Confidence: ${result.confidence ? result.confidence.toFixed(1) : '--'}%`;
+    
+    // Show save button after first successful analysis
+    document.getElementById('saveBtn').style.display = 'inline-block';
+    
+    const badge = document.getElementById('stressBadge');
+    badge.textContent = result.stress_text;
+    badge.className = 'badge';
+    
+    if (result.stress_level === 1) {
+        badge.classList.add('badge-low');
+    } else if (result.stress_level === 2) {
+        badge.classList.add('badge-moderate');
+    } else {
+        badge.classList.add('badge-high');
+    }
+}
+
+function toggleAutoAnalyze() {
+    const checkbox = document.getElementById('autoCheckbox');
+    
+    if (checkbox.checked) {
+        captureAndAnalyze(); // Immediate first capture
+        autoInterval = setInterval(captureAndAnalyze, 2000);
+    } else {
+        if (autoInterval) {
+            clearInterval(autoInterval);
+            autoInterval = null;
+        }
+    }
+}
+
+async function saveResult() {
+    if (!lastResult) {
+        alert('No analysis result to save. Please capture an image first.');
+        return;
+    }
+    
+    try {
+        const response = await fetch('/api/save-face-result', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                emotion: lastResult.emotion,
+                confidence: lastResult.confidence,
+                stress_level: lastResult.stress_level,
+                stress_text: lastResult.stress_text,
+                stress_score: lastResult.stress_score,
+                probabilities: lastResult.probabilities
+            })
+        });
+        
+        const result = await response.json();
+        if (result.success) {
+            document.getElementById('savedResult').style.display = 'block';
+            setTimeout(() => {
+                document.getElementById('savedResult').style.display = 'none';
+            }, 3000);
+        }
+    } catch (err) {
+        console.error('Save error:', err);
+        alert('Failed to save result. Please try again.');
+    }
+}
+
+// Theme toggle
+function toggleTheme() {
+    const body = document.body;
+    const icon = document.getElementById('themeIcon');
+    if (body.getAttribute('data-theme') === 'dark') {
+        body.removeAttribute('data-theme');
+        icon.textContent = '🌙';
+        localStorage.setItem('theme', 'light');
+    } else {
+        body.setAttribute('data-theme', 'dark');
+        icon.textContent = '☀️';
+        localStorage.setItem('theme', 'dark');
+    }
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme === 'dark') {
+        document.body.setAttribute('data-theme', 'dark');
+        document.getElementById('themeIcon').textContent = '☀️';
+    }
+});
+
+// Cleanup on page unload
+window.addEventListener('beforeunload', stopCamera);
+</script>
+
+</body>
+</html>

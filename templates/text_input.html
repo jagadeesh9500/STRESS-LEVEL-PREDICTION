@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Text Analysis - Stress Predictor</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+<button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle dark mode">
+    <span id="themeIcon">🌙</span>
+</button>
+
+<div class="container">
+    <h2>📝 Text Stress Analysis</h2>
+    <p>Express how you're feeling in words, and we'll analyze your stress level</p>
+
+    {% if error %}
+    <div class="alert alert-error">
+        ⚠️ {{ error }}
+    </div>
+    {% endif %}
+
+    <!-- Model Info Banner -->
+    <div class="model-banner" style="background: linear-gradient(135deg, var(--bg-gradient-1), var(--bg-gradient-2)); color: white; padding: 15px 20px; border-radius: 12px; margin-bottom: 25px;">
+        <div style="display: flex; align-items: center; gap: 15px; flex-wrap: wrap;">
+            <span style="font-size: 2rem;">📊</span>
+            <div>
+                <h4 style="margin: 0; color: white;">NLP Sentiment Analysis Model</h4>
+                <p style="margin: 5px 0 0 0; font-size: 13px; opacity: 0.9;">Analyzes text polarity, subjectivity, and stress-related keywords</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="feature-grid" style="margin-bottom: 30px;">
+        <div class="feature-card">
+            <div class="icon">💬</div>
+            <h4>Natural Language</h4>
+            <p>Write freely in your own words</p>
+        </div>
+        <div class="feature-card">
+            <div class="icon">🔍</div>
+            <h4>Keyword Detection</h4>
+            <p>Finds stress indicators</p>
+        </div>
+        <div class="feature-card">
+            <div class="icon">📈</div>
+            <h4>Detailed Insights</h4>
+            <p>Get actionable feedback</p>
+        </div>
+    </div>
+
+    <form method="POST" action="/text-analysis">
+        <div class="text-input-container">
+            <label for="textInput">How are you feeling today?</label>
+            <textarea 
+                name="text_input" 
+                id="textInput" 
+                placeholder="Write about your day, how you're feeling, what's on your mind... The more detail you provide, the more accurate the analysis will be."
+                rows="6"
+                required
+                minlength="10"
+                maxlength="2000"
+            ></textarea>
+            <div class="char-counter">
+                <span id="charCount">0</span>/2000 characters
+            </div>
+        </div>
+
+        <div class="prompt-suggestions">
+            <p style="font-size: 14px; color: var(--text-secondary); margin-bottom: 10px;">
+                💡 Not sure what to write? Try these prompts:
+            </p>
+            <div class="suggestion-chips">
+                <button type="button" class="chip" onclick="setPrompt('I feel overwhelmed by work deadlines and struggling to keep up...')">
+                    Work stress
+                </button>
+                <button type="button" class="chip" onclick="setPrompt('Today was a good day. I accomplished my goals and spent time with family...')">
+                    Positive day
+                </button>
+                <button type="button" class="chip" onclick="setPrompt('I\'m worried about the future and feeling uncertain about my career...')">
+                    Career anxiety
+                </button>
+                <button type="button" class="chip" onclick="setPrompt('I haven\'t been sleeping well lately and feel tired all the time...')">
+                    Sleep issues
+                </button>
+            </div>
+        </div>
+
+        <div class="btn-group" style="margin-top: 30px;">
+            <a href="/dashboard" class="btn btn-secondary">← Back</a>
+            <button type="submit" class="btn">Analyze Text →</button>
+        </div>
+    </form>
+
+    <div class="disclaimer">
+        🔒 Your text is analyzed locally and not permanently stored. 
+        Only the analysis results are saved to your history.
+    </div>
+</div>
+
+<script>
+// Character counter
+const textarea = document.getElementById('textInput');
+const charCount = document.getElementById('charCount');
+
+textarea.addEventListener('input', function() {
+    charCount.textContent = this.value.length;
+    
+    if (this.value.length >= 1800) {
+        charCount.style.color = 'var(--accent-red)';
+    } else {
+        charCount.style.color = 'var(--text-secondary)';
+    }
+});
+
+function setPrompt(text) {
+    textarea.value = text;
+    charCount.textContent = text.length;
+    textarea.focus();
+}
+
+// Theme toggle
+function toggleTheme() {
+    const body = document.body;
+    const icon = document.getElementById('themeIcon');
+    if (body.getAttribute('data-theme') === 'dark') {
+        body.removeAttribute('data-theme');
+        icon.textContent = '🌙';
+        localStorage.setItem('theme', 'light');
+    } else {
+        body.setAttribute('data-theme', 'dark');
+        icon.textContent = '☀️';
+        localStorage.setItem('theme', 'dark');
+    }
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme === 'dark') {
+        document.body.setAttribute('data-theme', 'dark');
+        document.getElementById('themeIcon').textContent = '☀️';
+    }
+});
+</script>
+
+</body>
+</html>

@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>How It Works - Stress Predictor</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+<button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle dark mode">
+    <span id="themeIcon">🌙</span>
+</button>
+
+<div class="container">
+    <!-- Progress Steps -->
+    <div class="progress-steps">
+        <div class="step active">1</div>
+        <div class="step-connector"></div>
+        <div class="step">2</div>
+        <div class="step-connector"></div>
+        <div class="step">3</div>
+    </div>
+
+    <h2>Hello {{ username }}! 👋</h2>
+    <p>Here's how the stress assessment works</p>
+
+    <!-- Assessment Methods -->
+    <h3 style="margin-bottom: 15px;">Choose Your Assessment Method</h3>
+    
+    <div class="dashboard-grid" style="margin-bottom: 30px;">
+        <a href="/measure" class="dashboard-card">
+            <div class="card-icon">📋</div>
+            <h3>Survey Assessment</h3>
+            <p>Answer 20 questions about your lifestyle, health, and environment</p>
+            <span class="card-tag">Most Comprehensive</span>
+        </a>
+        
+        <a href="/face-upload" class="dashboard-card">
+            <div class="card-icon">📸</div>
+            <h3>Facial Analysis</h3>
+            <p>Upload a photo or use your camera for instant emotion detection</p>
+            <span class="card-tag">Quick & Visual</span>
+        </a>
+        
+        <a href="/text-analysis" class="dashboard-card">
+            <div class="card-icon">📝</div>
+            <h3>Text Analysis</h3>
+            <p>Write about how you're feeling for sentiment-based stress detection</p>
+            <span class="card-tag">Express Yourself</span>
+        </a>
+        
+        <a href="/live-face" class="dashboard-card">
+            <div class="card-icon">📹</div>
+            <h3>Live Camera</h3>
+            <p>Real-time emotion detection using your webcam</p>
+            <span class="card-tag">Real-time</span>
+        </a>
+    </div>
+
+    <div style="background: var(--input-bg); padding: 25px; border-radius: 16px; text-align: left; margin-bottom: 30px;">
+        <h3 style="text-align: left; margin-bottom: 15px;">📌 Survey Instructions</h3>
+        <ul style="margin-top: 0;">
+            <li>✓ Rate each factor from <strong>1 (Low)</strong> to <strong>10 (High)</strong></li>
+            <li>✓ Be honest – this helps get accurate results</li>
+            <li>✓ Use the <strong>💬 Helper</strong> button if you need clarification on any factor</li>
+            <li>✓ Questions are grouped by 5 categories – take your time with each section</li>
+        </ul>
+    </div>
+
+    <div class="btn-group">
+        <a href="/" class="btn btn-secondary">← Back</a>
+        <a href="/dashboard" class="btn btn-secondary">📊 Dashboard</a>
+        <a href="/measure" class="btn">Start Survey →</a>
+    </div>
+</div>
+
+<script>
+function toggleTheme() {
+    const body = document.body;
+    const icon = document.getElementById('themeIcon');
+    
+    if (body.getAttribute('data-theme') === 'dark') {
+        body.removeAttribute('data-theme');
+        icon.textContent = '🌙';
+        localStorage.setItem('theme', 'light');
+    } else {
+        body.setAttribute('data-theme', 'dark');
+        icon.textContent = '☀️';
+        localStorage.setItem('theme', 'dark');
+    }
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme === 'dark') {
+        document.body.setAttribute('data-theme', 'dark');
+        document.getElementById('themeIcon').textContent = '☀️';
+    }
+});
+</script>
+
+</body>
+</html>

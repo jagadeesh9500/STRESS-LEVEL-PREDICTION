@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>History - Stress Predictor</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+<button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle dark mode">
+    <span id="themeIcon">🌙</span>
+</button>
+
+<div class="container">
+    <h2>📈 Your Stress History</h2>
+    <p>Track your stress levels over time, {{ username }}</p>
+
+    <!-- Filter Tabs -->
+    <div class="filter-tabs">
+        <a href="/history?type=all" class="filter-tab {% if filter_type == 'all' %}active{% endif %}">
+            📊 All
+        </a>
+        <a href="/history?type=survey" class="filter-tab {% if filter_type == 'survey' %}active{% endif %}">
+            📋 Surveys
+        </a>
+        <a href="/history?type=face" class="filter-tab {% if filter_type == 'face' %}active{% endif %}">
+            📸 Face Analysis
+        </a>
+        <a href="/history?type=text" class="filter-tab {% if filter_type == 'text' %}active{% endif %}">
+            📝 Text Analysis
+        </a>
+    </div>
+
+    {% if history %}
+    
+    <!-- Trend Chart -->
+    <div class="history-chart" style="position: relative; height: 250px;">
+        <h3 style="margin-bottom: 20px;">Stress Trend</h3>
+        <canvas id="stressChart"></canvas>
+    </div>
+
+    <!-- History List -->
+    <h3 style="margin-top: 30px;">Recent Assessments</h3>
+    <div class="history-list">
+        {% for item in history %}
+        <div class="history-item">
+            <div class="history-icon">
+                {% if item.type == 'survey' %}📋
+                {% elif item.type == 'face' %}📸
+                {% else %}📝{% endif %}
+            </div>
+            <div class="history-details">
+                <div class="badge {% if item.stress_level == 1 %}badge-low{% elif item.stress_level == 2 %}badge-moderate{% else %}badge-high{% endif %}" 
+                     style="margin: 0; padding: 8px 20px; font-size: 14px;">
+                    {{ item.stress_text }}
+                </div>
+                <div class="history-date" style="margin-top: 8px;">
+                    {{ item.created_at[:10] }} at {{ item.created_at[11:16] }}
+                </div>
+            </div>
+            <div>
+                {% if item.type == 'survey' %}
+                <strong>Top Factor:</strong> 
+                {% if item.top_factors %}
+                {{ item.top_factors[0][0].replace('_', ' ').title() }}
+                {% endif %}
+                {% elif item.type == 'face' %}
+                <strong>Emotion:</strong> {{ item.emotion|title }}
+                <br><small>{{ item.confidence|round(1) }}% confidence</small>
+                {% elif item.type == 'text' %}
+                <strong>Sentiment:</strong> 
+                {% if item.sentiment_polarity < -0.3 %}Negative
+                {% elif item.sentiment_polarity > 0.3 %}Positive
+                {% else %}Neutral{% endif %}
+                {% endif %}
+            </div>
+            <div class="history-type">{{ item.type|title }}</div>
+        </div>
+        {% endfor %}
+    </div>
+
+    {% else %}
+    
+    <div style="text-align: center; padding: 50px 20px;">
+        <div style="font-size: 60px; margin-bottom: 20px;">📊</div>
+        <h3>No History Yet</h3>
+        <p>Complete your first assessment to start tracking your stress levels over time.</p>
+    </div>
+    
+    {% endif %}
+
+    <div class="btn-group" style="margin-top: 40px;">
+        <a href="/measure" class="btn">Take New Assessment</a>
+        <a href="/" class="btn btn-secondary">← Home</a>
+    </div>
+
+    <div class="disclaimer">
+        💡 <strong>Tip:</strong> Regular assessments help you identify patterns and track your progress. 
+        Consider taking an assessment weekly to monitor changes in your stress levels.
+    </div>
+</div>
+
+<script>
+// Theme toggle
+function toggleTheme() {
+    const body = document.body;
+    const icon = document.getElementById('themeIcon');
+    
+    if (body.getAttribute('data-theme') === 'dark') {
+        body.removeAttribute('data-theme');
+        icon.textContent = '🌙';
+        localStorage.setItem('theme', 'light');
+    } else {
+        body.setAttribute('data-theme', 'dark');
+        icon.textContent = '☀️';
+        localStorage.setItem('theme', 'dark');
+    }
+    
+    // Update chart colors if exists
+    if (window.stressChart) {
+        updateChartTheme();
+    }
+}
+
+// Load saved theme
+document.addEventListener('DOMContentLoaded', function() {
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme === 'dark') {
+        document.body.setAttribute('data-theme', 'dark');
+        document.getElementById('themeIcon').textContent = '☀️';
+    }
+    
+    // Initialize chart if we have data
+    {% if trend_data %}
+    initChart();
+    {% endif %}
+});
+
+function initChart() {
+    const trendData = {{ trend_data|tojson|safe }};
+    
+    if (trendData.length === 0) return;
+    
+    const ctx = document.getElementById('stressChart').getContext('2d');
+    
+    const labels = trendData.map(d => {
+        const date = new Date(d.date);
+        return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    });
+    
+    const data = trendData.map(d => d.stress_level);
+    
+    const isDark = document.body.getAttribute('data-theme') === 'dark';
+    const textColor = isDark ? '#e0e0e0' : '#2b2b2b';
+    const gridColor = isDark ? '#3d3d5c' : '#e0e0e0';
+    
+    window.stressChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Stress Level',
+                data: data,
+                borderColor: '#667eea',
+                backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                borderWidth: 3,
+                fill: true,
+                tension: 0.4,
+                pointBackgroundColor: data.map(level => {
+                    if (level === 1) return '#28a745';
+                    if (level === 2) return '#ffc107';
+                    return '#dc3545';
+                }),
+                pointBorderColor: '#fff',
+                pointBorderWidth: 2,
+                pointRadius: 6,
+                pointHoverRadius: 8
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            animation: {
+                duration: 1000
+            },
+            plugins: {
+                legend: {
+                    display: false
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            const level = context.raw;
+                            const text = level === 1 ? 'Low' : level === 2 ? 'Moderate' : 'High';
+                            return 'Stress: ' + text;
+                        }
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    min: 0,
+                    max: 4,
+                    ticks: {
+                        stepSize: 1,
+                        color: textColor,
+                        callback: function(value) {
+                            if (value === 1) return 'Low';
+                            if (value === 2) return 'Moderate';
+                            if (value === 3) return 'High';
+                            return '';
+                        }
+                    },
+                    grid: {
+                        color: gridColor
+                    }
+                },
+                x: {
+                    ticks: {
+                        color: textColor
+                    },
+                    grid: {
+                        color: gridColor
+                    }
+                }
+            }
+        }
+    });
+}
+
+function updateChartTheme() {
+    if (!window.stressChart) return;
+    
+    const isDark = document.body.getAttribute('data-theme') === 'dark';
+    const textColor = isDark ? '#e0e0e0' : '#2b2b2b';
+    const gridColor = isDark ? '#3d3d5c' : '#e0e0e0';
+    
+    window.stressChart.options.scales.y.ticks.color = textColor;
+    window.stressChart.options.scales.x.ticks.color = textColor;
+    window.stressChart.options.scales.y.grid.color = gridColor;
+    window.stressChart.options.scales.x.grid.color = gridColor;
+    window.stressChart.update();
+}
+</script>
+
+</body>
+</html>

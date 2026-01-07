@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Face Analysis - Stress Predictor</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+<button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle dark mode">
+    <span id="themeIcon">🌙</span>
+</button>
+
+<div class="container">
+    <h2>📸 Facial Emotion Analysis</h2>
+    <p>Upload a photo to analyze your emotional state and stress level</p>
+
+    {% if error %}
+    <div class="alert alert-error">
+        ⚠️ {{ error }}
+    </div>
+    {% endif %}
+
+    <!-- Model Info Banner -->
+    <div class="model-banner" style="background: linear-gradient(135deg, var(--bg-gradient-1), var(--bg-gradient-2)); color: white; padding: 15px 20px; border-radius: 12px; margin-bottom: 25px;">
+        <div style="display: flex; align-items: center; gap: 15px; flex-wrap: wrap;">
+            <span style="font-size: 2rem;">🧠</span>
+            <div>
+                <h4 style="margin: 0; color: white;">EmotionDetector CNN (Keras/TensorFlow)</h4>
+                <p style="margin: 5px 0 0 0; font-size: 13px; opacity: 0.9;">18-layer CNN • 48x48 grayscale input • Trained on FER2013 dataset</p>
+                <p style="margin: 5px 0 0 0; font-size: 12px; opacity: 0.8;">Model: emotiondetector.h5 (48.5 MB)</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="feature-grid" style="margin-bottom: 30px;">
+        <div class="feature-card">
+            <div class="icon">🎯</div>
+            <h4>7 Emotions</h4>
+            <p>Detects facial expressions</p>
+        </div>
+        <div class="feature-card">
+            <div class="icon">⚡</div>
+            <h4>Instant Results</h4>
+            <p>Analysis in seconds</p>
+        </div>
+        <div class="feature-card">
+            <div class="icon">📊</div>
+            <h4>Stress Mapping</h4>
+            <p>Emotion → Stress level</p>
+        </div>
+    </div>
+
+    <form method="POST" enctype="multipart/form-data" id="uploadForm">
+        <div class="upload-zone" onclick="document.getElementById('fileInput').click()">
+            <div class="upload-icon">📷</div>
+            <p class="upload-text">Click to upload or drag and drop</p>
+            <p class="upload-hint">JPG, PNG or GIF (Max 16MB)</p>
+            <input type="file" name="file" id="fileInput" accept="image/*" required style="display: none;">
+        </div>
+        
+        <div id="preview" class="image-preview" style="display: none;">
+            <img id="previewImage" src="" alt="Preview">
+            <button type="button" class="btn btn-sm btn-secondary" onclick="clearPreview()">✕ Remove</button>
+        </div>
+        
+        <div class="btn-group" style="margin-top: 30px;">
+            <a href="/dashboard" class="btn btn-secondary">← Back</a>
+            <button type="submit" class="btn" id="analyzeBtn">Analyze Emotion →</button>
+        </div>
+    </form>
+
+    <div style="margin-top: 30px;">
+        <a href="/live-face" class="btn btn-secondary" style="width: 100%; text-align: center;">
+            📹 Or use Live Camera Detection
+        </a>
+    </div>
+
+    <div class="disclaimer">
+        💡 <strong>Tips for best results:</strong>
+        <ul style="text-align: left; margin-top: 10px;">
+            <li>Use a clear, front-facing photo</li>
+            <li>Ensure good lighting</li>
+            <li>Keep your face centered in the image</li>
+            <li>Avoid obstructions (sunglasses, masks)</li>
+        </ul>
+    </div>
+</div>
+
+<script>
+// Theme toggle
+function toggleTheme() {
+    const body = document.body;
+    const icon = document.getElementById('themeIcon');
+    if (body.getAttribute('data-theme') === 'dark') {
+        body.removeAttribute('data-theme');
+        icon.textContent = '🌙';
+        localStorage.setItem('theme', 'light');
+    } else {
+        body.setAttribute('data-theme', 'dark');
+        icon.textContent = '☀️';
+        localStorage.setItem('theme', 'dark');
+    }
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme === 'dark') {
+        document.body.setAttribute('data-theme', 'dark');
+        document.getElementById('themeIcon').textContent = '☀️';
+    }
+});
+
+// File preview
+document.getElementById('fileInput').addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            document.getElementById('previewImage').src = e.target.result;
+            document.getElementById('preview').style.display = 'block';
+            document.querySelector('.upload-zone').style.display = 'none';
+        };
+        reader.readAsDataURL(file);
+    }
+});
+
+function clearPreview() {
+    document.getElementById('fileInput').value = '';
+    document.getElementById('preview').style.display = 'none';
+    document.querySelector('.upload-zone').style.display = 'block';
+}
+
+// Drag and drop
+const uploadZone = document.querySelector('.upload-zone');
+
+uploadZone.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    uploadZone.classList.add('dragover');
+});
+
+uploadZone.addEventListener('dragleave', () => {
+    uploadZone.classList.remove('dragover');
+});
+
+uploadZone.addEventListener('drop', (e) => {
+    e.preventDefault();
+    uploadZone.classList.remove('dragover');
+    const file = e.dataTransfer.files[0];
+    if (file && file.type.startsWith('image/')) {
+        document.getElementById('fileInput').files = e.dataTransfer.files;
+        const event = new Event('change');
+        document.getElementById('fileInput').dispatchEvent(event);
+    }
+});
+</script>
+
+</body>
+</html>

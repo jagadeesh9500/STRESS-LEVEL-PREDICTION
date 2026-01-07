@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Stress Prediction - Welcome</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+<button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle dark mode">
+    <span id="themeIcon">🌙</span>
+</button>
+
+<div class="container">
+    <h1 style="margin-bottom: 10px;">🧘 Stress Level Predictor</h1>
+    <p style="font-size: 18px; margin-bottom: 10px;">
+        Understand your stress. Take control of your wellbeing.
+    </p>
+    <p style="font-size: 14px; color: var(--text-secondary);">
+        Powered by AI to give you personalized insights
+    </p>
+
+    <div class="feature-grid">
+        <div class="feature-card">
+            <div class="icon">📋</div>
+            <h4>Survey Assessment</h4>
+            <p>20-factor comprehensive analysis</p>
+        </div>
+        <div class="feature-card">
+            <div class="icon">📸</div>
+            <h4>Face Detection</h4>
+            <p>CNN emotion recognition</p>
+        </div>
+        <div class="feature-card">
+            <div class="icon">📝</div>
+            <h4>Text Analysis</h4>
+            <p>NLP sentiment detection</p>
+        </div>
+        <div class="feature-card">
+            <div class="icon">📊</div>
+            <h4>Track Progress</h4>
+            <p>Monitor trends over time</p>
+        </div>
+    </div>
+
+    <form method="POST" action="/" style="text-align:center; margin-top: 30px;">
+        <input type="text"
+               name="username"
+               placeholder="Enter your name"
+               required
+               aria-label="Your name"
+               autocomplete="name">
+        <br><br>
+        <button type="submit" class="btn">Get Started →</button>
+    </form>
+
+    <!-- Quick Access Section -->
+    <div class="quick-access" style="margin-top: 30px;">
+        <p style="font-size: 14px; color: var(--text-secondary); margin-bottom: 15px;">Or try a quick analysis:</p>
+        <div class="btn-group">
+            <a href="/face-upload" class="btn btn-secondary btn-sm">📸 Face Scan</a>
+            <a href="/text-analysis" class="btn btn-secondary btn-sm">📝 Text Analysis</a>
+            <a href="/live-face" class="btn btn-secondary btn-sm">🎥 Live Detection</a>
+            <a href="/dashboard" class="btn btn-secondary btn-sm">📊 Dashboard</a>
+        </div>
+        <p style="font-size: 12px; margin-top: 15px;">
+            <a href="/home" style="color: var(--primary);">View all features & AI models →</a>
+        </p>
+    </div>
+
+    <div class="disclaimer">
+        ⚠️ This tool is for informational purposes only and is not a substitute for professional medical advice. 
+        If you're experiencing severe stress or mental health concerns, please consult a healthcare professional.
+    </div>
+</div>
+
+<script>
+// Theme toggle functionality
+function toggleTheme() {
+    const body = document.body;
+    const icon = document.getElementById('themeIcon');
+    
+    if (body.getAttribute('data-theme') === 'dark') {
+        body.removeAttribute('data-theme');
+        icon.textContent = '🌙';
+        localStorage.setItem('theme', 'light');
+    } else {
+        body.setAttribute('data-theme', 'dark');
+        icon.textContent = '☀️';
+        localStorage.setItem('theme', 'dark');
+    }
+}
+
+// Load saved theme preference
+document.addEventListener('DOMContentLoaded', function() {
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme === 'dark') {
+        document.body.setAttribute('data-theme', 'dark');
+        document.getElementById('themeIcon').textContent = '☀️';
+    }
+});
+</script>
+
+</body>
+</html>

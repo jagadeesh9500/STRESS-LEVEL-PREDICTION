@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Assessment - Stress Predictor</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+<button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle dark mode">
+    <span id="themeIcon">🌙</span>
+</button>
+
+<div class="container">
+    <!-- Progress Steps -->
+    <div class="progress-steps">
+        <div class="step completed">✓</div>
+        <div class="step-connector completed"></div>
+        <div class="step active">2</div>
+        <div class="step-connector"></div>
+        <div class="step">3</div>
+    </div>
+
+    <h2>Stress Assessment</h2>
+    <p>{{ username }}, rate each factor honestly from 1 to 10</p>
+
+    <!-- Form Progress Bar -->
+    <div class="form-progress">
+        <div class="form-progress-fill" id="formProgress" style="width: 0%"></div>
+    </div>
+    <p style="font-size: 12px; margin-top: -15px; margin-bottom: 25px;">
+        <span id="progressText">0 of 20 questions answered</span>
+    </p>
+
+    <form method="POST" action="/result" id="assessmentForm">
+        {% for cat_key, cat_data in categories.items() %}
+        <div class="category-section">
+            <div class="category-header {% if loop.first %}active{% endif %}" onclick="toggleCategory(this)">
+                <div>
+                    <span class="icon">{{ cat_data.icon }}</span>
+                    {{ cat_data.name }}
+                    <span style="font-size: 12px; opacity: 0.8;">({{ cat_data.features|length }} questions)</span>
+                </div>
+                <span class="arrow">▼</span>
+            </div>
+            <div class="category-content {% if loop.first %}active{% endif %}">
+                {% for feature in cat_data.features %}
+                <div class="slider-container">
+                    <div class="slider-header">
+                        <label for="{{ feature }}">
+                            <b>{{ feature.replace('_',' ').title() }}</b>
+                            <button type="button" class="help-btn" onclick="showHelp('{{ feature }}')" 
+                                    style="background: none; border: none; cursor: pointer; font-size: 14px;"
+                                    aria-label="Get help for {{ feature.replace('_',' ').title() }}">❓</button>
+                        </label>
+                        <span class="slider-value" id="val_{{ feature }}">5</span>
+                    </div>
+                    <input type="range" 
+                           name="{{ feature }}" 
+                           id="{{ feature }}"
+                           min="1" 
+                           max="10" 
+                           value="5"
+                           oninput="updateSlider('{{ feature }}', this.value)"
+                           aria-label="{{ feature.replace('_',' ').title() }}">
+                    <div style="display: flex; justify-content: space-between; font-size: 11px; color: var(--text-secondary); margin-top: 5px;">
+                        <span>Low (1)</span>
+                        <span>High (10)</span>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endfor %}
+
+        <!-- Loading State -->
+        <div class="loading" id="loadingState">
+            <div class="spinner"></div>
+            <p>Analyzing your responses...</p>
+        </div>
+
+        <div style="text-align:center; margin-top: 30px;" id="submitArea">
+            <button type="submit" class="btn" id="submitBtn">
+                🔍 Analyze My Stress Level
+            </button>
+        </div>
+    </form>
+
+    <div class="disclaimer">
+        💡 Not sure about a question? Click the ❓ button or use the chatbot for guidance.
+    </div>
+
+    <!-- Model Information -->
+    <div class="model-info-box">
+        <h4>🤖 AI Model: Random Forest Classifier</h4>
+        <div class="model-details">
+            <p><strong>Algorithm:</strong> Ensemble Machine Learning (Random Forest)</p>
+            <p><strong>Input Features:</strong> 20 lifestyle and psychological factors</p>
+            <p><strong>Categories Analyzed:</strong></p>
+            <ul style="margin: 5px 0 10px 20px; font-size: 13px;">
+                <li>Sleep & Recovery patterns</li>
+                <li>Work & Academic pressure</li>
+                <li>Social & Emotional factors</li>
+                <li>Physical Health indicators</li>
+                <li>Mental Wellness markers</li>
+            </ul>
+            <p><strong>Explainability:</strong> SHAP (SHapley Additive exPlanations) for transparent predictions</p>
+        </div>
+    </div>
+
+    <!-- Try Other Methods -->
+    <div class="other-methods">
+        <h4>🔄 Try Other Assessment Methods</h4>
+        <div style="display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; margin-top: 10px;">
+            <a href="/face-upload" class="btn" style="font-size: 13px; padding: 8px 15px;">📸 Face Emotion Analysis</a>
+            <a href="/text-analysis" class="btn" style="font-size: 13px; padding: 8px 15px;">📝 Text Sentiment Analysis</a>
+        </div>
+    </div>
+</div>
+
+<!-- Enhanced Chatbot -->
+<button class="chatbot-btn" onclick="toggleChat()" aria-label="Open help assistant">💬</button>
+
+<div class="chatbot-box" id="chatbox">
+    <div class="chatbot-header">
+        <h4>🤖 Stress Guide</h4>
+        <button class="chatbot-close" onclick="toggleChat()" aria-label="Close chat">×</button>
+    </div>
+    <div class="chatbot-messages" id="chatMessages">
+        <div class="chat-message bot">
+            Hi {{ username }}! 👋 I'm here to help you understand each factor. Select a question from the dropdown below to learn more about it.
+        </div>
+    </div>
+    <div class="chatbot-input-area">
+        <select class="chatbot-select" id="featureSelect" onchange="explainFeature(this.value)">
+            <option value="">Choose a factor to learn more...</option>
+            {% for cat_key, cat_data in categories.items() %}
+            <optgroup label="{{ cat_data.icon }} {{ cat_data.name }}">
+                {% for feature in cat_data.features %}
+                <option value="{{ feature }}">{{ feature.replace('_',' ').title() }}</option>
+                {% endfor %}
+            </optgroup>
+            {% endfor %}
+        </select>
+    </div>
+</div>
+
+<script>
+// Feature explanations
+const explanations = {{ explanations|tojson|safe }};
+
+// Track answered questions
+let answeredQuestions = new Set();
+
+function updateSlider(feature, value) {
+    document.getElementById('val_' + feature).textContent = value;
+    answeredQuestions.add(feature);
+    updateProgress();
+}
+
+function updateProgress() {
+    const total = 20;
+    const answered = answeredQuestions.size;
+    const percent = (answered / total) * 100;
+    
+    document.getElementById('formProgress').style.width = percent + '%';
+    document.getElementById('progressText').textContent = answered + ' of ' + total + ' questions answered';
+}
+
+function toggleCategory(header) {
+    const content = header.nextElementSibling;
+    const isActive = content.classList.contains('active');
+    
+    // Toggle current category
+    header.classList.toggle('active');
+    content.classList.toggle('active');
+}
+
+function toggleChat() {
+    const box = document.getElementById('chatbox');
+    box.classList.toggle('active');
+}
+
+function showHelp(feature) {
+    toggleChat();
+    document.getElementById('featureSelect').value = feature;
+    explainFeature(feature);
+}
+
+function explainFeature(feature) {
+    if (!feature) return;
+    
+    const messagesContainer = document.getElementById('chatMessages');
+    const explanation = explanations[feature] || "This factor contributes to your overall stress assessment.";
+    const featureName = feature.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+    
+    // Add user message
+    const userMsg = document.createElement('div');
+    userMsg.className = 'chat-message user';
+    userMsg.textContent = 'Tell me about ' + featureName;
+    messagesContainer.appendChild(userMsg);
+    
+    // Add bot response
+    setTimeout(() => {
+        const botMsg = document.createElement('div');
+        botMsg.className = 'chat-message bot';
+        botMsg.innerHTML = '<strong>' + featureName + ':</strong><br>' + explanation;
+        messagesContainer.appendChild(botMsg);
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    }, 300);
+    
+    messagesContainer.scrollTop = messagesContainer.scrollHeight;
+}
+
+// Form submission with loading state
+document.getElementById('assessmentForm').addEventListener('submit', function(e) {
+    document.getElementById('loadingState').classList.add('active');
+    document.getElementById('submitArea').style.display = 'none';
+});
+
+// Theme toggle
+function toggleTheme() {
+    const body = document.body;
+    const icon = document.getElementById('themeIcon');
+    
+    if (body.getAttribute('data-theme') === 'dark') {
+        body.removeAttribute('data-theme');
+        icon.textContent = '🌙';
+        localStorage.setItem('theme', 'light');
+    } else {
+        body.setAttribute('data-theme', 'dark');
+        icon.textContent = '☀️';
+        localStorage.setItem('theme', 'dark');
+    }
+}
+
+// Load saved theme
+document.addEventListener('DOMContentLoaded', function() {
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme === 'dark') {
+        document.body.setAttribute('data-theme', 'dark');
+        document.getElementById('themeIcon').textContent = '☀️';
+    }
+    
+    // Open first category by default
+    const firstCategory = document.querySelector('.category-content');
+    if (firstCategory) {
+        firstCategory.classList.add('active');
+        firstCategory.previousElementSibling.classList.add('active');
+    }
+});
+</script>
+
+</body>
+</html>

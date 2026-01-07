@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Your Results - Stress Predictor</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+<button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle dark mode">
+    <span id="themeIcon">🌙</span>
+</button>
+
+<div class="container">
+    <!-- Progress Steps -->
+    <div class="progress-steps">
+        <div class="step completed">✓</div>
+        <div class="step-connector completed"></div>
+        <div class="step completed">✓</div>
+        <div class="step-connector completed"></div>
+        <div class="step active">3</div>
+    </div>
+
+    <h2>{{ username }}, here's your stress analysis</h2>
+
+    <!-- Stress Level Badge -->
+    <div style="text-align: center;">
+        <div class="badge {{ badge_class }}">
+            {% if stress_level == 1 %}😊{% elif stress_level == 2 %}😐{% else %}😟{% endif %}
+            {{ stress_text }}
+        </div>
+    </div>
+
+    <!-- Progress Bar -->
+    <div style="margin: 30px 0;">
+        <p style="font-size: 14px; margin-bottom: 10px;">Stress Level Indicator</p>
+        <div class="progress">
+            <div class="progress-fill {{ progress_class }}" id="stressBar"></div>
+        </div>
+        <div style="display: flex; justify-content: space-between; font-size: 12px; color: var(--text-secondary); margin-top: 5px;">
+            <span>Low</span>
+            <span>Moderate</span>
+            <span>High</span>
+        </div>
+    </div>
+
+    <!-- Top Contributing Factors -->
+    <h3 style="margin-top: 30px;">📊 Top Contributing Factors</h3>
+    <p style="font-size: 14px;">These factors had the most impact on your stress prediction</p>
+    
+    <div class="factors-grid">
+        {% for factor, importance in top_factors %}
+        <div class="factor-card">
+            <h4>{{ factor.replace('_', ' ').title() }}</h4>
+            <div class="importance">Impact: {{ (importance * 100)|round(1) }}%</div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Emergency Resources (High Stress Only) -->
+    {% if emergency_resources %}
+    <div class="emergency-box">
+        <h3>🆘 Need Immediate Support?</h3>
+        <p style="color: #c53030;">If you're struggling, please reach out. You don't have to face this alone.</p>
+        
+        <div class="emergency-contacts">
+            {% for key, resource in emergency_resources.items() %}
+            <div class="emergency-contact">
+                <h4>{{ resource.name }}</h4>
+                <div class="phone">📞 {{ resource.number }}</div>
+                <p style="font-size: 12px; margin: 0;">{{ resource.description }}</p>
+            </div>
+            {% endfor %}
+        </div>
+        
+        <p style="margin-top: 15px; font-size: 14px; color: #c53030;">
+            <strong>Remember:</strong> Seeking help is a sign of strength, not weakness.
+        </p>
+    </div>
+    {% endif %}
+
+    <!-- Personalized Advice -->
+    <h3 id="typingTitle" style="margin-top: 30px;"></h3>
+
+    <ul id="adviceList" style="opacity: 0; transition: opacity 0.5s ease;">
+        {% for tip in advice %}
+        {% if tip %}
+        <li>{{ tip }}</li>
+        {% endif %}
+        {% endfor %}
+    </ul>
+
+    <!-- Try Other Methods -->
+    <div style="background: var(--input-bg); padding: 20px; border-radius: 16px; margin-top: 30px;">
+        <h4 style="margin-bottom: 15px;">🔍 Try Other Assessment Methods</h4>
+        <div class="btn-group">
+            <a href="/face-upload" class="btn btn-sm btn-secondary">📸 Face Analysis</a>
+            <a href="/text-analysis" class="btn btn-sm btn-secondary">📝 Text Analysis</a>
+            <a href="/live-face" class="btn btn-sm btn-secondary">📹 Live Camera</a>
+        </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="btn-group" style="margin-top: 30px;">
+        <a href="/measure" class="btn btn-secondary">🔄 Re-Assess</a>
+        <a href="/history" class="btn btn-secondary">📈 View History</a>
+        <a href="/dashboard" class="btn btn-secondary">📊 Dashboard</a>
+        <button onclick="exportResults()" class="export-btn">
+            📄 Export Results
+        </button>
+    </div>
+
+    <div class="disclaimer">
+        ⚠️ <strong>Disclaimer:</strong> This AI-based assessment is for informational purposes only and should not replace professional medical advice. 
+        If you're experiencing significant stress or mental health concerns, please consult a healthcare professional.
+    </div>
+</div>
+
+<script>
+// Animate progress bar
+document.addEventListener('DOMContentLoaded', function() {
+    const bar = document.getElementById('stressBar');
+    const stressLevel = {{ stress_level }};
+    
+    setTimeout(() => {
+        if (stressLevel === 1) {
+            bar.style.width = '33%';
+        } else if (stressLevel === 2) {
+            bar.style.width = '66%';
+        } else {
+            bar.style.width = '100%';
+        }
+    }, 300);
+    
+    // Load saved theme
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme === 'dark') {
+        document.body.setAttribute('data-theme', 'dark');
+        document.getElementById('themeIcon').textContent = '☀️';
+    }
+});
+
+// Typing effect for advice title
+const text = "💡 Personalized AI Advice";
+let i = 0;
+function typeEffect() {
+    if (i < text.length) {
+        document.getElementById('typingTitle').innerHTML += text.charAt(i);
+        i++;
+        setTimeout(typeEffect, 45);
+    } else {
+        // Show advice list after typing completes
+        document.getElementById('adviceList').style.opacity = '1';
+    }
+}
+setTimeout(typeEffect, 500);
+
+// Theme toggle
+function toggleTheme() {
+    const body = document.body;
+    const icon = document.getElementById('themeIcon');
+    
+    if (body.getAttribute('data-theme') === 'dark') {
+        body.removeAttribute('data-theme');
+        icon.textContent = '🌙';
+        localStorage.setItem('theme', 'light');
+    } else {
+        body.setAttribute('data-theme', 'dark');
+        icon.textContent = '☀️';
+        localStorage.setItem('theme', 'dark');
+    }
+}
+
+// Export results as text
+function exportResults() {
+    const username = "{{ username }}";
+    const stressText = "{{ stress_text }}";
+    const advice = {{ advice|tojson|safe }};
+    const topFactors = {{ top_factors|tojson|safe }};
+    
+    let content = `STRESS ASSESSMENT RESULTS\n`;
+    content += `========================\n\n`;
+    content += `Name: ${username}\n`;
+    content += `Date: ${new Date().toLocaleDateString()}\n`;
+    content += `Stress Level: ${stressText}\n\n`;
+    
+    content += `TOP CONTRIBUTING FACTORS:\n`;
+    topFactors.forEach((factor, index) => {
+        content += `${index + 1}. ${factor[0].replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())} (${(factor[1] * 100).toFixed(1)}%)\n`;
+    });
+    
+    content += `\nPERSONALIZED RECOMMENDATIONS:\n`;
+    advice.forEach(tip => {
+        if (tip) content += `• ${tip}\n`;
+    });
+    
+    content += `\n---\nGenerated by AI Stress Predictor\n`;
+    content += `Disclaimer: This is for informational purposes only.\n`;
+    
+    // Create download
+    const blob = new Blob([content], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `stress_assessment_${new Date().toISOString().split('T')[0]}.txt`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+}
+</script>
+
+</body>
+</html>

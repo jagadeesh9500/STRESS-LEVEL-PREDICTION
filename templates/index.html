@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stress Level Prediction System</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+        .feature-card {
+            background: var(--card-bg, #fff);
+            border-radius: 16px;
+            padding: 25px;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+            transition: transform 0.3s, box-shadow 0.3s;
+            border: 1px solid var(--border-color, #e8e8e8);
+        }
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.12);
+        }
+        .feature-icon {
+            font-size: 48px;
+            margin-bottom: 15px;
+        }
+        .feature-card h3 {
+            margin-bottom: 10px;
+            color: var(--text-primary, #333);
+        }
+        .feature-card p {
+            font-size: 14px;
+            color: var(--text-secondary, #666);
+            margin-bottom: 15px;
+        }
+        .model-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 11px;
+            margin-bottom: 10px;
+        }
+        .hero-section {
+            text-align: center;
+            padding: 40px 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 20px;
+            margin-bottom: 30px;
+        }
+        .hero-section h1 {
+            font-size: 2.5em;
+            margin-bottom: 15px;
+        }
+        .hero-section p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+        .ai-models-section {
+            background: var(--card-bg, #fff);
+            border-radius: 16px;
+            padding: 25px;
+            margin-top: 30px;
+            border: 1px solid var(--border-color, #e8e8e8);
+        }
+        .ai-models-section h3 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .model-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            justify-content: center;
+        }
+        .model-item {
+            background: var(--bg-secondary, #f8f9fa);
+            padding: 15px 20px;
+            border-radius: 12px;
+            text-align: center;
+            min-width: 180px;
+        }
+        .model-item strong {
+            display: block;
+            margin-bottom: 5px;
+            color: var(--primary, #667eea);
+        }
+    </style>
+</head>
+<body>
+
+<button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle dark mode">
+    <span id="themeIcon">🌙</span>
+</button>
+
+<div class="container">
+    <!-- Hero Section -->
+    <div class="hero-section">
+        <h1>🧠 Stress Level Prediction</h1>
+        <p>AI-Powered Multi-Modal Mental Health Assessment</p>
+    </div>
+
+    <!-- Feature Cards -->
+    <div class="feature-grid">
+        <!-- Survey Assessment -->
+        <div class="feature-card">
+            <div class="model-badge">Random Forest ML</div>
+            <div class="feature-icon">📋</div>
+            <h3>Survey Assessment</h3>
+            <p>Answer 20 questions about your lifestyle and get a detailed stress analysis with SHAP explainability.</p>
+            <a href="/welcome" class="btn">Start Assessment</a>
+        </div>
+
+        <!-- Face Emotion Analysis -->
+        <div class="feature-card">
+            <div class="model-badge">EmotionCNN Deep Learning</div>
+            <div class="feature-icon">📸</div>
+            <h3>Face Emotion Analysis</h3>
+            <p>Upload a photo or use your webcam. Our CNN model detects 7 emotions and maps them to stress levels.</p>
+            <a href="/face-upload" class="btn">Analyze Face</a>
+        </div>
+
+        <!-- Text Analysis -->
+        <div class="feature-card">
+            <div class="model-badge">TextBlob NLP</div>
+            <div class="feature-icon">📝</div>
+            <h3>Text Sentiment Analysis</h3>
+            <p>Write about your day or feelings. NLP analyzes sentiment, detects keywords, and estimates stress.</p>
+            <a href="/text-analysis" class="btn">Analyze Text</a>
+        </div>
+
+        <!-- Live Detection -->
+        <div class="feature-card">
+            <div class="model-badge">Real-time CNN</div>
+            <div class="feature-icon">🎥</div>
+            <h3>Live Emotion Detection</h3>
+            <p>Real-time webcam-based emotion tracking with continuous stress monitoring.</p>
+            <a href="/live-face" class="btn">Start Live</a>
+        </div>
+    </div>
+
+    <!-- AI Models Section -->
+    <div class="ai-models-section">
+        <h3>🤖 AI Models Powering This System</h3>
+        <div class="model-list">
+            <div class="model-item">
+                <strong>Random Forest</strong>
+                <small>20 features → Stress Level</small>
+            </div>
+            <div class="model-item">
+                <strong>EmotionCNN</strong>
+                <small>48×48 image → 7 emotions</small>
+            </div>
+            <div class="model-item">
+                <strong>TextBlob NLP</strong>
+                <small>Text → Sentiment scores</small>
+            </div>
+            <div class="model-item">
+                <strong>SHAP</strong>
+                <small>Explainable AI insights</small>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Links -->
+    <div style="text-align: center; margin-top: 30px;">
+        <a href="/dashboard" class="btn btn-secondary" style="margin: 5px;">📊 Dashboard</a>
+        <a href="/history" class="btn btn-secondary" style="margin: 5px;">📜 History</a>
+        <a href="/guide" class="btn btn-secondary" style="margin: 5px;">📖 Guide</a>
+    </div>
+
+    <div class="disclaimer" style="margin-top: 30px;">
+        ⚠️ This tool is for informational purposes only and does not replace professional mental health advice.
+    </div>
+</div>
+
+<script>
+function toggleTheme() {
+    const body = document.body;
+    const icon = document.getElementById('themeIcon');
+    if (body.getAttribute('data-theme') === 'dark') {
+        body.removeAttribute('data-theme');
+        icon.textContent = '🌙';
+        localStorage.setItem('theme', 'light');
+    } else {
+        body.setAttribute('data-theme', 'dark');
+        icon.textContent = '☀️';
+        localStorage.setItem('theme', 'dark');
+    }
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme === 'dark') {
+        document.body.setAttribute('data-theme', 'dark');
+        document.getElementById('themeIcon').textContent = '☀️';
+    }
+});
+</script>
+
+</body>
+</html>
