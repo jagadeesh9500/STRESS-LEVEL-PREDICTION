@@ -1,0 +1,27 @@
+# Core Web Framework
+flask
+werkzeug
+
+# Data Processing & ML
+numpy
+pandas
+scikit-learn
+joblib
+
+# Visualization
+matplotlib
+seaborn
+
+# Emotion Detection & Face Analysis
+torch
+torchvision
+tensorflow
+keras
+opencv-python-headless
+Pillow
+
+# Text Analysis
+textblob
+
+# Database
+# sqlite3 is built-in with Python
