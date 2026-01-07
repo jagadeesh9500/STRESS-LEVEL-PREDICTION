@@ -1,21 +1,22 @@
-Stress Level Prediction & Mental Health Advisor
+# Stress Level Prediction & Mental Health Advisor
 
-A comprehensive web-based application that predicts stress levels using multiple analysis methods and provides personalized mental health advice. This system combines survey-based assessment, facial emotion detection, and text sentiment analysis to evaluate stress levels and offer tailored recommendations.
-🎯 Project Overview
+A comprehensive web-based application that predicts stress levels using multiple analysis methods and provides personalized mental health advice. This system combines **survey-based assessment**, **facial emotion detection**, and **text sentiment analysis** to evaluate stress levels and offer tailored recommendations.
+
+## 🎯 Project Overview
 
 This application combines machine learning with mental health guidance to:
+- **Multi-Modal Stress Assessment**: Three ways to measure stress (survey, face, text)
+- **Facial Emotion Detection**: AI-powered analysis of facial expressions using CNN
+- **Text Sentiment Analysis**: NLP-based stress detection from written text
+- **Survey-Based Prediction**: Analyze 20 stress-related factors
+- **Provide Personalized Advice**: Generate actionable recommendations based on stress level
+- **Identify Key Factors**: Use explainable AI to highlight the most significant stress contributors
+- **Track History**: SQLite database stores assessment history for progress tracking
+- **User-Friendly Interface**: Interactive web interface with intuitive input forms
 
-    Multi-Modal Stress Assessment: Three ways to measure stress (survey, face, text)
-    Facial Emotion Detection: AI-powered analysis of facial expressions using CNN
-    Text Sentiment Analysis: NLP-based stress detection from written text
-    Survey-Based Prediction: Analyze 20 stress-related factors
-    Provide Personalized Advice: Generate actionable recommendations based on stress level
-    Identify Key Factors: Use explainable AI to highlight the most significant stress contributors
-    Track History: SQLite database stores assessment history for progress tracking
-    User-Friendly Interface: Interactive web interface with intuitive input forms
+## 🏗️ Project Structure
 
-🏗️ Project Structure
-
+```
 ├── app.py                          # Main Flask application
 ├── config.py                       # Configuration settings
 ├── database.py                     # SQLite database operations
@@ -53,111 +54,102 @@ This application combines machine learning with mental health guidance to:
 │   └── images/                     # UI images
 ├── uploads/                        # Uploaded face images
 └── README.md                       # This file
-📊 Features
-🎭 Three Assessment Methods
-1. Survey-Based Assessment (20 Factors)
+```
 
+## 📊 Features
+
+### 🎭 Three Assessment Methods
+
+#### 1. Survey-Based Assessment (20 Factors)
 Rate yourself on 20 stress-related factors across multiple dimensions:
 
-Psychological Factors
+**Psychological Factors**
+- Anxiety Level
+- Self-Esteem
+- Mental Health History
+- Depression
 
-    Anxiety Level
-    Self-Esteem
-    Mental Health History
-    Depression
+**Physical Health Indicators**
+- Headache
+- Blood Pressure
+- Sleep Quality
+- Breathing Problems
 
-Physical Health Indicators
+**Environmental Factors**
+- Noise Level
+- Living Conditions
+- Safety
+- Basic Needs
 
-    Headache
-    Blood Pressure
-    Sleep Quality
-    Breathing Problems
+**Academic/Professional Factors**
+- Academic Performance
+- Study Load
+- Teacher-Student Relationship
+- Future Career Concerns
 
-Environmental Factors
+**Social Factors**
+- Social Support
+- Peer Pressure
+- Extracurricular Activities
+- Bullying
 
-    Noise Level
-    Living Conditions
-    Safety
-    Basic Needs
+#### 2. Facial Emotion Detection
+- **Upload Image**: Upload a photo for emotion analysis
+- **Live Camera**: Real-time emotion detection using webcam
+- **CNN Model**: Uses 18-layer CNN trained on FER2013 dataset
+- **7 Emotions**: Detects Angry, Disgust, Fear, Happy, Sad, Surprise, Neutral
+- **Emotion-to-Stress Mapping**: Maps detected emotion to stress level
 
-Academic/Professional Factors
+#### 3. Text Sentiment Analysis
+- **NLP-Powered**: Uses TextBlob for sentiment analysis
+- **Keyword Detection**: Identifies stress-related keywords
+- **Polarity Analysis**: Measures positive/negative sentiment
+- **Contextual Understanding**: Considers text subjectivity
 
-    Academic Performance
-    Study Load
-    Teacher-Student Relationship
-    Future Career Concerns
-
-Social Factors
-
-    Social Support
-    Peer Pressure
-    Extracurricular Activities
-    Bullying
-
-2. Facial Emotion Detection
-
-    Upload Image: Upload a photo for emotion analysis
-    Live Camera: Real-time emotion detection using webcam
-    CNN Model: Uses 18-layer CNN trained on FER2013 dataset
-    7 Emotions: Detects Angry, Disgust, Fear, Happy, Sad, Surprise, Neutral
-    Emotion-to-Stress Mapping: Maps detected emotion to stress level
-
-3. Text Sentiment Analysis
-
-    NLP-Powered: Uses TextBlob for sentiment analysis
-    Keyword Detection: Identifies stress-related keywords
-    Polarity Analysis: Measures positive/negative sentiment
-    Contextual Understanding: Considers text subjectivity
-
-Stress Levels
-
+### Stress Levels
 The system classifies stress into three categories:
+- **Low Stress** (Level 1): You are doing well
+- **Moderate Stress** (Level 2): Maintain work-life balance
+- **High Stress** (Level 3): Professional help recommended
 
-    Low Stress (Level 1): You are doing well
-    Moderate Stress (Level 2): Maintain work-life balance
-    High Stress (Level 3): Professional help recommended
+### 📈 Dashboard & History
+- **Unified Dashboard**: View all assessment types in one place
+- **History Tracking**: SQLite database stores all assessments
+- **Trend Analysis**: Track stress levels over time
+- **Filter by Type**: View survey, face, or text assessments separately
 
-📈 Dashboard & History
-
-    Unified Dashboard: View all assessment types in one place
-    History Tracking: SQLite database stores all assessments
-    Trend Analysis: Track stress levels over time
-    Filter by Type: View survey, face, or text assessments separately
-
-Personalized Recommendations
-
+### Personalized Recommendations
 Each stress level includes tailored advice:
+- **Low Stress**: Maintain healthy habits
+- **Moderate Stress**: Engagement in physical activities, regular breaks
+- **High Stress**: Sleep improvement, meditation, workload reduction, professional consultation
 
-    Low Stress: Maintain healthy habits
-    Moderate Stress: Engagement in physical activities, regular breaks
-    High Stress: Sleep improvement, meditation, workload reduction, professional consultation
+### Explainable AI
+The results page displays the **top 3 contributing factors** to the stress prediction, helping users understand which aspects most influenced their score.
 
-Explainable AI
+## 🛠️ Technology Stack
 
-The results page displays the top 3 contributing factors to the stress prediction, helping users understand which aspects most influenced their score.
-🛠️ Technology Stack
+- **Backend**: Flask (Python web framework)
+- **Machine Learning**: 
+  - scikit-learn (Random Forest Classifier)
+  - TensorFlow/Keras (CNN for emotion detection)
+  - PyTorch (alternative emotion model)
+- **Computer Vision**: OpenCV, Pillow
+- **NLP**: TextBlob for sentiment analysis
+- **Database**: SQLite for history tracking
+- **Frontend**: Bootstrap 5, HTML5, CSS3, JavaScript
+- **Data Processing**: Pandas, NumPy
+- **Model Persistence**: joblib, .h5, .pt formats
 
-    Backend: Flask (Python web framework)
-    Machine Learning:
-        scikit-learn (Random Forest Classifier)
-        TensorFlow/Keras (CNN for emotion detection)
-        PyTorch (alternative emotion model)
-    Computer Vision: OpenCV, Pillow
-    NLP: TextBlob for sentiment analysis
-    Database: SQLite for history tracking
-    Frontend: Bootstrap 5, HTML5, CSS3, JavaScript
-    Data Processing: Pandas, NumPy
-    Model Persistence: joblib, .h5, .pt formats
+## 🚀 Getting Started
 
-🚀 Getting Started
-Prerequisites
+### Prerequisites
+- Python 3.7+
+- pip (Python package manager)
+- Webcam (optional, for live face detection)
 
-    Python 3.7+
-    pip (Python package manager)
-    Webcam (optional, for live face detection)
-
-Required Libraries
-
+### Required Libraries
+```
 flask
 werkzeug
 numpy
@@ -173,181 +165,190 @@ keras
 opencv-python-headless
 Pillow
 textblob
+```
 
-Installation
+### Installation
 
-Clone or download the project
+1. **Clone or download the project**
+   ```bash
+   git clone https://github.com/jagadeesh9500/Stress-level-Prediction.git
+   cd Stress-Level-Prediction-
+   ```
 
-git clone https://github.com/jagadeesh9500/Stress-level-Prediction.git
-cd Stress-Level-Prediction-
+2. **Create virtual environment (recommended)**
+   ```bash
+   python -m venv venv
+   source venv/bin/activate  # Linux/Mac
+   # or
+   venv\Scripts\activate     # Windows
+   ```
 
-Create virtual environment (recommended)
+3. **Install dependencies**
+   ```bash
+   pip install -r requirements.txt
+   ```
 
-python -m venv venv
-source venv/bin/activate  # Linux/Mac
-# or
-venv\Scripts\activate     # Windows
+4. **Download TextBlob corpora**
+   ```bash
+   python -m textblob.download_corpora
+   ```
 
-Install dependencies
+5. **Verify setup** (check all dependencies are installed)
+   ```bash
+   python check_setup.py
+   ```
 
-pip install -r requirements.txt
+6. **Train the stress model** (if models/ folder doesn't have stress_model.pkl)
+   ```bash
+   python model_training.py
+   ```
 
-Download TextBlob corpora
+## 📈 Running the Application
 
-python -m textblob.download_corpora
+1. **Start the Flask server**
+   ```bash
+   python app.py
+   ```
 
-Verify setup (check all dependencies are installed)
+2. **Open your browser**
+   Navigate to: `http://localhost:5000`
 
-python check_setup.py
+3. **Use the Application**
+   - Enter your name on the welcome page
+   - Choose your assessment method:
+     - **Survey**: Rate 20 stress factors (1-10)
+     - **Face Upload**: Upload an image for emotion analysis
+     - **Live Camera**: Real-time emotion detection
+     - **Text Analysis**: Write about your feelings
+   - View personalized prediction and advice
+   - Check your history and trends on the dashboard
 
-Train the stress model (if models/ folder doesn't have stress_model.pkl)
+## 📝 How It Works
 
-python model_training.py
+### 1. Survey-Based Assessment
+- Users rate themselves on 20 stress-related factors (1-10 scale)
+- Values are scaled to match dataset feature ranges
+- Random Forest model classifies stress level
+- Feature importance identifies top contributing factors
 
-📈 Running the Application
+### 2. Facial Emotion Detection
+- CNN model (FER2013-trained) processes 48x48 grayscale images
+- Detects one of 7 emotions with confidence score
+- Maps emotion to stress level (e.g., Angry → High Stress)
+- Works with uploaded images or live webcam feed
 
-Start the Flask server
+### 3. Text Sentiment Analysis
+- TextBlob analyzes sentiment polarity (-1 to +1)
+- Keyword detection identifies stress-related words
+- Subjectivity score measures emotional vs factual content
+- Combined analysis produces stress prediction
 
-python app.py
-
-    Open your browser Navigate to: http://localhost:5000
-
-    Use the Application
-        Enter your name on the welcome page
-        Choose your assessment method:
-            Survey: Rate 20 stress factors (1-10)
-            Face Upload: Upload an image for emotion analysis
-            Live Camera: Real-time emotion detection
-            Text Analysis: Write about your feelings
-        View personalized prediction and advice
-        Check your history and trends on the dashboard
-
-📝 How It Works
-1. Survey-Based Assessment
-
-    Users rate themselves on 20 stress-related factors (1-10 scale)
-    Values are scaled to match dataset feature ranges
-    Random Forest model classifies stress level
-    Feature importance identifies top contributing factors
-
-2. Facial Emotion Detection
-
-    CNN model (FER2013-trained) processes 48x48 grayscale images
-    Detects one of 7 emotions with confidence score
-    Maps emotion to stress level (e.g., Angry → High Stress)
-    Works with uploaded images or live webcam feed
-
-3. Text Sentiment Analysis
-
-    TextBlob analyzes sentiment polarity (-1 to +1)
-    Keyword detection identifies stress-related words
-    Subjectivity score measures emotional vs factual content
-    Combined analysis produces stress prediction
-
-4. Advice Generation
-
+### 4. Advice Generation
 Based on the predicted stress level, the system generates relevant recommendations tailored to the assessment method and detected factors.
-5. History & Trends
 
+### 5. History & Trends
 All assessments are stored in SQLite database for tracking progress over time.
-🔧 Key Files Description
-File 	Purpose
-app.py 	Main Flask application with all route handlers
-config.py 	Configuration settings (paths, thresholds, mappings)
-database.py 	SQLite database operations for history tracking
-emotion_detector.py 	Facial emotion detection using CNN/Keras
-text_analyzer.py 	Text sentiment analysis using TextBlob
-advice_engine.py 	Generates personalized advice based on stress level
-model_training.py 	Trains Random Forest model on stress dataset
-train_emotion_model.py 	Trains emotion detection model
-check_setup.py 	Validates all required libraries are installed
-test_dataset.py 	Verifies dataset integrity and structure
-📊 Model Details
-Stress Prediction Model
 
-Algorithm: Random Forest Classifier
+## 🔧 Key Files Description
 
-    Estimators: 300 trees
-    Random State: 42 (for reproducibility)
-    Class Weights: Balanced (handles class imbalance)
-    Train-Test Split: 80-20 ratio
-    Scaling: StandardScaler
+| File | Purpose |
+|------|---------|
+| `app.py` | Main Flask application with all route handlers |
+| `config.py` | Configuration settings (paths, thresholds, mappings) |
+| `database.py` | SQLite database operations for history tracking |
+| `emotion_detector.py` | Facial emotion detection using CNN/Keras |
+| `text_analyzer.py` | Text sentiment analysis using TextBlob |
+| `advice_engine.py` | Generates personalized advice based on stress level |
+| `model_training.py` | Trains Random Forest model on stress dataset |
+| `train_emotion_model.py` | Trains emotion detection model |
+| `check_setup.py` | Validates all required libraries are installed |
+| `test_dataset.py` | Verifies dataset integrity and structure |
 
-Emotion Detection Model
+## 📊 Model Details
 
-Architecture: 18-layer CNN (Keras/TensorFlow)
+### Stress Prediction Model
+**Algorithm**: Random Forest Classifier
+- **Estimators**: 300 trees
+- **Random State**: 42 (for reproducibility)
+- **Class Weights**: Balanced (handles class imbalance)
+- **Train-Test Split**: 80-20 ratio
+- **Scaling**: StandardScaler
 
-    Input: 48x48 grayscale images
-    Output: 7 emotion classes
-    Training Data: FER2013 dataset
-    Format: .h5 (Keras model)
+### Emotion Detection Model
+**Architecture**: 18-layer CNN (Keras/TensorFlow)
+- **Input**: 48x48 grayscale images
+- **Output**: 7 emotion classes
+- **Training Data**: FER2013 dataset
+- **Format**: .h5 (Keras model)
 
-Text Analysis
+### Text Analysis
+**Library**: TextBlob
+- **Polarity Range**: -1 (negative) to +1 (positive)
+- **Subjectivity Range**: 0 (objective) to 1 (subjective)
 
-Library: TextBlob
+## 🌐 Web Routes
 
-    Polarity Range: -1 (negative) to +1 (positive)
-    Subjectivity Range: 0 (objective) to 1 (subjective)
+| Route | Method | Description |
+|-------|--------|-------------|
+| `/` | GET, POST | Welcome page and username entry |
+| `/home` | GET | Landing page with feature showcase |
+| `/guide` | GET | Information guide about stress factors |
+| `/measure` | GET | Stress measurement form (20 questions) |
+| `/result` | POST | Displays survey predictions and advice |
+| `/face-upload` | GET, POST | Face image upload for emotion analysis |
+| `/live-face` | GET | Live camera emotion detection |
+| `/text-analysis` | GET, POST | Text sentiment analysis |
+| `/dashboard` | GET | Unified dashboard with all assessments |
+| `/history` | GET | Assessment history with filters |
+| `/api/analyze-frame` | POST | API for live frame analysis |
+| `/api/save-face-result` | POST | API to save face detection results |
+| `/api/explain/<feature>` | GET | API for feature explanations |
 
-🌐 Web Routes
-Route 	Method 	Description
-/ 	GET, POST 	Welcome page and username entry
-/home 	GET 	Landing page with feature showcase
-/guide 	GET 	Information guide about stress factors
-/measure 	GET 	Stress measurement form (20 questions)
-/result 	POST 	Displays survey predictions and advice
-/face-upload 	GET, POST 	Face image upload for emotion analysis
-/live-face 	GET 	Live camera emotion detection
-/text-analysis 	GET, POST 	Text sentiment analysis
-/dashboard 	GET 	Unified dashboard with all assessments
-/history 	GET 	Assessment history with filters
-/api/analyze-frame 	POST 	API for live frame analysis
-/api/save-face-result 	POST 	API to save face detection results
-/api/explain/<feature> 	GET 	API for feature explanations
-🛡️ Security Features
+## 🛡️ Security Features
 
-    Session-based username storage
-    Secret key configuration for Flask session management
-    Input validation and type conversion
-    Secure file upload handling with allowed extensions
-    Maximum file size limit (16MB)
+- Session-based username storage
+- Secret key configuration for Flask session management
+- Input validation and type conversion
+- Secure file upload handling with allowed extensions
+- Maximum file size limit (16MB)
 
-💡 Usage Tips
+## 💡 Usage Tips
 
-    Honest Assessment: Rate factors based on your actual experience
-    Context: Consider the past week or month when rating
-    Professional Help: For high stress, consider consulting a mental health professional
-    Regular Monitoring: Use periodically to track stress changes
+1. **Honest Assessment**: Rate factors based on your actual experience
+2. **Context**: Consider the past week or month when rating
+3. **Professional Help**: For high stress, consider consulting a mental health professional
+4. **Regular Monitoring**: Use periodically to track stress changes
 
-📌 Notes
+## 📌 Notes
 
-    The stress model requires a properly formatted CSV dataset with the 20 features and a stress_level column
-    Feature order in the application must match the dataset order
-    Emotion detection requires the .h5 model files in the models/ directory
-    Webcam access is required for live face detection feature
-    Text analysis requires TextBlob corpora to be downloaded
-    All assessment data is stored locally in SQLite database
+- The stress model requires a properly formatted CSV dataset with the 20 features and a `stress_level` column
+- Feature order in the application must match the dataset order
+- Emotion detection requires the .h5 model files in the models/ directory
+- Webcam access is required for live face detection feature
+- Text analysis requires TextBlob corpora to be downloaded
+- All assessment data is stored locally in SQLite database
 
-🔮 Future Enhancements
+## 🔮 Future Enhancements
 
-    User authentication and accounts
-    Cloud database integration
-    Multiple language support
-    Enhanced visualizations and charts
-    Integration with mental health resources
-    Mobile application version
-    Push notifications for stress alerts
-    Voice-based stress analysis
-    Wearable device integration
-    Export reports as PDF
+- [ ] User authentication and accounts
+- [ ] Cloud database integration
+- [ ] Multiple language support
+- [ ] Enhanced visualizations and charts
+- [ ] Integration with mental health resources
+- [ ] Mobile application version
+- [ ] Push notifications for stress alerts
+- [ ] Voice-based stress analysis
+- [ ] Wearable device integration
+- [ ] Export reports as PDF
 
-📄 License
+## 📄 License
 
 This project is created for educational and mental health assessment purposes.
-✍️ Author
 
-jagadeesh9500
+## ✍️ Author
+
+**jagadeesh9500**
 
 Developed as a comprehensive stress prediction and mental health advisory system.
 
-⭐ If you find this project helpful, please consider giving it a star
+⭐ If you find this project helpful, please consider giving it a star!
