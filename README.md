@@ -53,7 +53,6 @@ This application combines machine learning with mental health guidance to:
 │   └── images/                     # UI images
 ├── uploads/                        # Uploaded face images
 └── README.md                       # This file
-
 📊 Features
 🎭 Three Assessment Methods
 1. Survey-Based Assessment (20 Factors)
